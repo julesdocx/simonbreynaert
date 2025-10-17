@@ -2,3 +2,19 @@
     cursor: pointer;
     user-select: none;
 }
+.card__gallery--thumbs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 4px;
+}
+
+.card__gallery--thumbs img {
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.card__header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}

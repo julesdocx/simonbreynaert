@@ -147,8 +147,10 @@ export default function IndexPage({
                 cursor: 'pointer',
               }}
             >
+              
+
               {/* === Tag Toggles === */}
-              <div
+              {/* <div
                 className="tags_container"
                 style={{
                   display: 'flex',
@@ -180,7 +182,7 @@ export default function IndexPage({
                     </div>
                   )
                 })}
-              </div>
+              </div> */}
             </div>
           </AnimatePresence>
         </section>

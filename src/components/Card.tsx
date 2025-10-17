@@ -24,12 +24,30 @@ export default function Card({ post, expandAll }: { post: Post, expandAll?: bool
     >
       <div className="card__container">
         <div className="card__header">
-          <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-            <h3 className="card__title">
+            <p className="card__title">
                 {post.title}
-            </h3>
+            </p>
+            {post.gallery && post.gallery.length > 0 && (
+              <div className="card__gallery--thumbs">
+                {post.gallery.map((image, i) => (
+                  <Image
+                    key={image._key || i}
+                    src={urlForImage(image).url()}
+                    alt={image.alt || `Gallery image ${i + 1}`}
+                    width={100}
+                    height={100}
+                    quality={10}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover',
+                      aspectRatio: '1/1'
+                    }}
+                  />
+                ))}
+              </div>
+              )}
             {/* Toggle Slider */}
-          </div>
         </div>
         
         <AnimatePresence>
