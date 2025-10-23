@@ -11,9 +11,9 @@ export default function Card({ post, expandAll }: { post: Post, expandAll?: bool
     setIsExpanded(!isExpanded)
   }
 
-      useEffect(() => {
-      setIsExpanded(expandAll ?? false)
-    }, [expandAll])
+  useEffect(() => {
+  setIsExpanded(expandAll ?? false)
+}, [expandAll])
 
   return (
     <motion.div
@@ -24,9 +24,9 @@ export default function Card({ post, expandAll }: { post: Post, expandAll?: bool
     >
       <div className="card__container">
         <div className="card__header">
-            <p className="card__title">
+            {/* <p className="card__title">
                 {post.title}
-            </p>
+            </p> */}
             {post.gallery && post.gallery.length > 0 && (
               <div className="card__gallery--thumbs">
                 {post.gallery.map((image, i) => (
@@ -36,8 +36,8 @@ export default function Card({ post, expandAll }: { post: Post, expandAll?: bool
                     alt={image.alt || `Gallery image ${i + 1}`}
                     width={100}
                     height={100}
-                    quality={10}
-                    style={{ 
+                    quality={5}
+                    style={{
                       width: '100%', 
                       height: '100%', 
                       objectFit: 'cover',
@@ -50,7 +50,7 @@ export default function Card({ post, expandAll }: { post: Post, expandAll?: bool
             {/* Toggle Slider */}
         </div>
         
-        <AnimatePresence>
+        {/* <AnimatePresence>
           {isExpanded && (
             <motion.div
             initial={{ height: 0, opacity: 0 }}
@@ -101,7 +101,7 @@ export default function Card({ post, expandAll }: { post: Post, expandAll?: bool
               )}
             </motion.div>
           )}
-        </AnimatePresence>
+        </AnimatePresence> */}
       </div>
     </motion.div>
   )
