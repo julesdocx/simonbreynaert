@@ -47,7 +47,16 @@ export default function Card({
 
   return (
     <div className="card" onClick={onClick}>
-      <p className='card__header'>{post.title}</p>
+      <p 
+        className='card__header'
+        style={{
+          fontWeight: isSelected ? 'bold' : 'normal',
+          fontSize: isSelected ? '16px' : '12px',
+          transition: 'font-size 0.2s, font-weight 0.2s'
+        }}
+      >
+        {post.title}
+      </p>
       <p className="card__date">
         {new Date(post.date).toLocaleDateString('en-GB', {
           day: '2-digit',
