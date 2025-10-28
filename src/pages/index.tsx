@@ -49,6 +49,21 @@ export default function IndexPage({
   const [activeTags, setActiveTags] = useState<string[]>([])
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(true)
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
+  const [hoveredPostId, setHoveredPostId] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 750)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const allTags = Array.from(new Set(posts.flatMap((p) => p.tags || [])))
 
@@ -107,6 +122,7 @@ export default function IndexPage({
     }
 
     setSelectedPost(post)
+    setSelectedImageIndex(0) // Reset to first image (mainImage)
     const query = { ...router.query, post: post._id }
     router.push(
       {
@@ -120,6 +136,7 @@ export default function IndexPage({
 
   const closeDetail = () => {
     setSelectedPost(null)
+    setSelectedImageIndex(0)
     const query = { ...router.query }
     delete query.post
     router.push(
@@ -144,21 +161,52 @@ export default function IndexPage({
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .reverse()
 
+  // Create combined array of all images (mainImage + gallery)
+  const getAllImages = (post: Post) => {
+    const images = []
+    
+    // Add mainImage as first item if it exists
+    if (post.mainImage && post.mainImage.asset) {
+      images.push({ image: post.mainImage, isMain: true })
+    }
+    
+    // Add gallery images
+    if (post.gallery && post.gallery.length > 0) {
+      post.gallery
+        .filter((image) => image && image.asset)
+        .forEach((image) => {
+          images.push({ image, isMain: false })
+        })
+    }
+    
+    return images
+  }
+
   return (
     <Container>
       <div className="header__container">
         <header className={`header ${!isHeaderExpanded ? 'header-collapsed' : ''}`}>
 
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence>
             <div className="posts__container">
               {sortedPosts.length ? (
                 sortedPosts
                   .slice()
                   .reverse()
-                  .map((post) => {
+                  .map((post, cardIndex) => {
                     const isSelected = selectedPost && selectedPost._id === post._id
+                    const isHovered = hoveredPostId === post._id
                     const hasSelection = selectedPost !== null
-                    const opacity = hasSelection ? (isSelected ? 1 : 0.2) : 1
+                    const hasHover = hoveredPostId !== null
+                    
+                    // If selected, use selection opacity logic
+                    // Otherwise, use hover opacity logic (only on desktop)
+                    let opacity = 1
+                    if (hasSelection) {
+                      opacity = isSelected ? 1 : 0.2
+                    } else if (hasHover && !isMobile) {
+                      opacity = isHovered ? 1 : 0.2
+                    }
 
                     return (
                       <motion.div
@@ -167,11 +215,23 @@ export default function IndexPage({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: opacity, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ 
+                          duration: 0.3,
+                        }}
                         onClick={() => selectPost(post)}
+                        onMouseEnter={() => !isMobile && setHoveredPostId(post._id)}
+                        onMouseLeave={() => !isMobile && setHoveredPostId(null)}
                         style={{ cursor: 'pointer' }}
                       >
-                        <Card post={post} expandAll={false} />
+                        <Card 
+                          post={post} 
+                          expandAll={false}
+                          isSelected={isSelected}
+                          isMobile={isMobile}
+                          selectedImageIndex={selectedImageIndex}
+                          onImageSelect={(index) => setSelectedImageIndex(index)}
+                          allImages={getAllImages(post)}
+                        />
                       </motion.div>
                     )
                   })
@@ -188,106 +248,103 @@ export default function IndexPage({
             </div>
           </AnimatePresence>
         </header>
-      <div id="mainDiv">
-        <section style={{ marginTop: '10px' }}>
-            <AnimatePresence>
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ 
-                  duration: 0.4, 
-                  ease: "easeInOut",
-                  opacity: { duration: 0.3 }
-                }}
-                style={{ overflow: 'hidden' }}
+        
+        <div id="mainDiv">
+          <AnimatePresence>
+            {selectedPost && !isMobile && (
+              <motion.section
+                className="detail-view"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
               >
-                <div style={{ padding: '0px 0' }}>
-                  {selectedPost && selectedPost.body ? (
-                    <div className="header__body-content">
-                      <h3 style={{ marginTop: '0px' }}>{selectedPost.title}</h3>
-                      <p className="detail-view__date">
-                        {new Date(selectedPost.date).toLocaleDateString()}
-                      </p>
-                      <div className="detail-view__tags">
-                        {selectedPost.tags && selectedPost.tags.map((tag) => (
-                          <span key={tag}>
-                            {tag}
-                          </span>
-                        ))}
+                <div className="detail-view__content">
+                  <AnimatePresence>
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ 
+                        duration: 0.4, 
+                        ease: "easeInOut",
+                        opacity: { duration: 0.3 }
+                      }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div style={{ marginTop: '10px' }}>
+                        {/* Large display of selected image */}
+                        {(() => {
+                          const allImages = getAllImages(selectedPost)
+                          const selectedImageData = allImages[selectedImageIndex]
+                          
+                          if (!selectedImageData) return null
+                          
+                          const imageUrl = urlForImage(selectedImageData.image)?.url()
+                          if (!imageUrl) return null
+                          
+                          return (
+                            <div className="image-container" style={{ marginBottom: '1rem' }}>
+                              <Image
+                                src={imageUrl}
+                                alt={selectedImageData.isMain ? selectedPost.title : `Gallery image`}
+                                width={0}
+                                height={0}
+                                sizes="100vw"
+                                style={{
+                                  width: '100%',  
+                                  height: 'auto',
+                                  maxHeight: '400px',
+                                  objectFit: 'contain'
+                                }}
+                              />
+                            </div>
+                          )
+                        })()}
+
+                        {/* Thumbnail grid */}
+                        <div className="card__gallery--thumbs">
+                          {getAllImages(selectedPost).map((imageData, i) => {
+                            const imageUrl = urlForImage(imageData.image)?.url()
+                            if (!imageUrl) return null
+                            
+                            const isCurrentlySelected = i === selectedImageIndex
+                            
+                            return (
+                              <div
+                                key={i}
+                                onClick={() => setSelectedImageIndex(i)}
+                                style={{
+                                  cursor: 'pointer',
+                                  transition: 'box-shadow 0.2s',
+                                  boxShadow: isCurrentlySelected ? '0 4px 8px rgba(0, 0, 0, 0.3)' : 'none'
+                                }}
+                              >
+                                <Image
+                                  src={imageUrl}
+                                  alt={imageData.isMain ? selectedPost.title : `Thumbnail ${i}`}
+                                  width={100}
+                                  height={100}
+                                  quality={50}
+                                  style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover',
+                                    aspectRatio: '1/1'
+                                  }}
+                                />
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                      <PortableText value={selectedPost.body} />
-                    </div>
-                  ) : (
-                    <p>Brussels, Belgium<br />breynaertsimon@gmail.com</p>
-                  )}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
-              </motion.div>
+              </motion.section>
+            )}
           </AnimatePresence>
-        </section>
-
-        <AnimatePresence>
-          {selectedPost && (
-            <motion.section
-              className="detail-view"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="detail-view__content">
-
-                <AnimatePresence>
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ 
-                      duration: 0.4, 
-                      ease: "easeInOut",
-                      opacity: { duration: 0.3 }
-                    }}
-                    style={{ overflow: 'hidden' }}
-                  >
-                    <div style={{ marginTop: '10px' }}>
-                      {selectedPost.mainImage && (
-                        <div className="image-container">
-                          <Image
-                            src={urlForImage(selectedPost.mainImage).url()}
-                            alt={selectedPost.title}
-                            width={0}
-                            height={0}
-                            sizes="100vw"
-                            style={{
-                              width: '100%',  
-                              height: 'auto',
-                            }}
-                          />
-                        </div>
-                      )}
-                      
-                      {selectedPost.gallery && selectedPost.gallery.length > 0 && (
-                        <div className="gallery">
-                          {selectedPost.gallery.map((image, i) => (
-                            <Image
-                              key={image._key || i}
-                              src={urlForImage(image).url()}
-                              alt={image.alt || `Gallery image ${i + 1}`}
-                              width={600}
-                              height={400}
-                              style={{ width: '100%', height: 'auto', marginBottom: '1rem' }}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
-      </div>
+        </div>
       </div>
     </Container>
   )
