@@ -203,9 +203,9 @@ export default function IndexPage({
                     // Otherwise, use hover opacity logic (only on desktop)
                     let opacity = 1
                     if (hasSelection) {
-                      opacity = isSelected ? 1 : 0.2
+                      opacity = isSelected ? 1 : 0.05
                     } else if (hasHover && !isMobile) {
-                      opacity = isHovered ? 1 : 0.2
+                      opacity = isHovered ? 1 : 0.05
                     }
 
                     return (
@@ -294,7 +294,7 @@ export default function IndexPage({
                                 style={{
                                   width: '100%',  
                                   height: 'auto',
-                                  maxHeight: '400px',
+                                  maxHeight: '800px',
                                   objectFit: 'contain'
                                 }}
                               />

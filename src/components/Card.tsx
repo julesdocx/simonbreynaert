@@ -107,7 +107,7 @@ export default function Card({
                       style={{
                         width: '100%',  
                         height: 'auto',
-                        maxHeight: '400px',
+                        maxHeight: '1000px',
                         objectFit: 'contain'
                       }}
                     />
