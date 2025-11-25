@@ -37,7 +37,8 @@ export default function PostDetail({
                 <X/>
             </Button>
         <div>
-          <h2 className="text-2xl font-bold mb-2">{post.title}</h2>
+          <h3 className="text-2xl font-bold mb-2">{post.title}</h3>
+          <h2 className="mb-2 font-normal">{post.subtitle}</h2>
           {post.date && (
             <p className="text-sm text-muted-foreground">
               {new Date(post.date).getFullYear()}
