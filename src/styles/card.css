@@ -1,7 +1,10 @@
 .card {
     cursor: pointer;
     user-select: none;
+    grid-template-columns: 120px 1fr;
+    padding: 6px;
 }
+
 .card__gallery--thumbs {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -15,20 +18,18 @@
 }
 
 .card__header {
-    margin: 8px 0px 0px 0px; ;
+    margin-left: 8px;
 }
 
-.card__date {
-    color: #969696;
-    font-size: 10px;
-    display: inline;
+.card__image {
+    /* width: 100px; */
+    object-fit: cover;
 }
 
-.card__tags {
-    color: #969696;
-    font-size: 10px;
-    display: inline;
+.card__badges {
+    margin: 6px 0px;
 }
-.card__tags span {
-    margin-left: 6px;
+
+.card__content {
+    grid-column: span 2;
 }

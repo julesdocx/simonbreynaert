@@ -4,22 +4,26 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { motion, AnimatePresence } from 'motion/react'
 import Image from 'next/image'
-import { PortableText } from '@portabletext/react'
 
 import Card from '~/components/Card'
+import FilterTags from '~/components/FilterTags'
+import PostDetail from '~/components/PostDetail'
 import Container from '~/components/Container'
 import { readToken } from '~/lib/sanity.api'
 import { getClient } from '~/lib/sanity.client'
 import { getPosts, type Post, postsQuery } from '~/lib/sanity.queries'
 import { urlForImage } from '~/lib/sanity.image'
 import type { SharedPageProps } from '~/pages/_app'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '~/components/ui/drawer'
 
-export const getStaticProps: GetStaticProps<
-  SharedPageProps & {
-    posts: Post[]
-    tags: string[]
-  }
-> = async ({ draftMode = false }) => {
+export const getStaticProps: GetStaticProps<SharedPageProps & { posts: Post[]; tags: string[] }> = async ({ draftMode = false }) => {
   const client = getClient(draftMode ? { token: readToken } : undefined)
   const posts = await getPosts(client)
 
@@ -48,7 +52,7 @@ export default function IndexPage({
   const [posts] = useLiveQuery<Post[]>(initialPosts, postsQuery)
   const [activeTags, setActiveTags] = useState<string[]>([])
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
-  const [isHeaderExpanded, setIsHeaderExpanded] = useState(true)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
   const [hoveredPostId, setHoveredPostId] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(false)
@@ -65,8 +69,6 @@ export default function IndexPage({
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  const allTags = Array.from(new Set(posts.flatMap((p) => p.tags || [])))
-
   useEffect(() => {
     const urlTags = router.query.tags
     if (typeof urlTags === 'string') {
@@ -78,13 +80,14 @@ export default function IndexPage({
     const postId = router.query.post
     if (typeof postId === 'string') {
       const post = posts.find((p) => p._id === postId)
-      if (post) setSelectedPost(post)
+      if (post) {
+        setSelectedPost(post)
+        setIsDrawerOpen(true)
+      }
+    } else {
+      setIsDrawerOpen(false)
     }
   }, [router.query.tags, router.query.post, posts])
-
-  const toggleHeader = () => {
-    setIsHeaderExpanded(!isHeaderExpanded)
-  }
 
   const updateUrlTags = (tags: string[]) => {
     const query = { ...router.query }
@@ -114,15 +117,19 @@ export default function IndexPage({
     })
   }
 
+  const allTags = Array.from(new Set(posts.flatMap((p) => p.tags || [])))
+
   const selectPost = (post: Post) => {
     // Toggle: if clicking on already selected post, deselect it
     if (selectedPost && selectedPost._id === post._id) {
-      closeDetail()
+      closeDrawer()
       return
     }
 
     setSelectedPost(post)
-    setSelectedImageIndex(0) // Reset to first image (mainImage)
+    setSelectedImageIndex(0)
+    setIsDrawerOpen(true)
+    
     const query = { ...router.query, post: post._id }
     router.push(
       {
@@ -134,9 +141,11 @@ export default function IndexPage({
     )
   }
 
-  const closeDetail = () => {
+  const closeDrawer = () => {
+    setIsDrawerOpen(false)
     setSelectedPost(null)
     setSelectedImageIndex(0)
+    
     const query = { ...router.query }
     delete query.post
     router.push(
@@ -165,12 +174,10 @@ export default function IndexPage({
   const getAllImages = (post: Post) => {
     const images = []
     
-    // Add mainImage as first item if it exists
     if (post.mainImage && post.mainImage.asset) {
       images.push({ image: post.mainImage, isMain: true })
     }
     
-    // Add gallery images
     if (post.gallery && post.gallery.length > 0) {
       post.gallery
         .filter((image) => image && image.asset)
@@ -178,173 +185,124 @@ export default function IndexPage({
           images.push({ image, isMain: false })
         })
     }
-    
+
     return images
   }
 
   return (
     <Container>
-      <div className="header__container">
-        <header className={`header ${!isHeaderExpanded ? 'header-collapsed' : ''}`}>
-
-          <AnimatePresence>
-            <div className="posts__container">
-              {sortedPosts.length ? (
-                sortedPosts
-                  .slice()
-                  .reverse()
-                  .map((post, cardIndex) => {
-                    const isSelected = selectedPost && selectedPost._id === post._id
-                    const isHovered = hoveredPostId === post._id
-                    const hasSelection = selectedPost !== null
-                    const hasHover = hoveredPostId !== null
-                    
-                    // If selected, use selection opacity logic
-                    // Otherwise, use hover opacity logic (only on desktop)
-                    let opacity = 1
-                    if (hasSelection) {
-                      opacity = isSelected ? 1 : 0.05
-                    } else if (hasHover && !isMobile) {
-                      opacity = isHovered ? 1 : 0.05
-                    }
-
-                    return (
-                      <motion.div
-                        key={post._id}
-                        layout
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: opacity, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ 
-                          duration: 0.3,
-                        }}
-                        onClick={() => selectPost(post)}
-                        onMouseEnter={() => !isMobile && setHoveredPostId(post._id)}
-                        onMouseLeave={() => !isMobile && setHoveredPostId(null)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <Card 
-                          post={post} 
-                          expandAll={false}
-                          isSelected={isSelected}
-                          isMobile={isMobile}
-                          selectedImageIndex={selectedImageIndex}
-                          onImageSelect={(index) => setSelectedImageIndex(index)}
-                          allImages={getAllImages(post)}
-                        />
-                      </motion.div>
-                    )
-                  })
-              ) : (
-                <motion.div
-                  key="no-posts"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  No posts match the selected tags.
-                </motion.div>
-              )}
-            </div>
-          </AnimatePresence>
-        </header>
-        
-        <div id="mainDiv">
-          <AnimatePresence>
-            {selectedPost && !isMobile && (
-              <motion.section
-                className="detail-view"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="detail-view__content">
-                  <AnimatePresence>
+      <div className="flex justify-center md:justify-between">
+        {/* Main content area */}
+        <div className={`grid transition-all duration-300 ${selectedPost && !isMobile ? '' : ''}`}>
+          <div className="header__container">
+            <div className="header">
+                <div className="posts__container w-full md:w-auto">
+                  {sortedPosts.length ? (
+                    sortedPosts
+                      .slice()
+                      .reverse()
+                      .map((post) => {
+                        const isSelected = selectedPost && selectedPost._id === post._id
+                        const isHovered = hoveredPostId === post._id
+                        const hasSelection = selectedPost !== null
+                        const hasHover = hoveredPostId !== null
+                        
+                        let opacity = 1
+                        if (hasSelection) {
+                          // If this card is selected, full opacity
+                          // If another card is selected, low opacity
+                          // If hovering over this card (even when another is selected), show it
+                          if (isSelected) {
+                            opacity = 1
+                          } else if (isHovered) {
+                            opacity = 0.7 // Show on hover even when something else is selected
+                          } else {
+                            opacity = 0.5
+                          }
+                        } else if (hasHover && !isMobile) {
+                          opacity = isHovered ? 1 : 0.5
+                        }
+                        return (
+                          <motion.div
+                            key={post._id}
+                            
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: opacity, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            onClick={() => selectPost(post)}
+                            onMouseEnter={() => !isMobile && setHoveredPostId(post._id)}
+                            onMouseLeave={() => !isMobile && setHoveredPostId(null)}
+                            style={{ cursor: 'pointer', width:  ''}}
+                          >
+                            <Card 
+                              post={post} 
+                              onClick={() => selectPost(post)}
+                              isSelected={isSelected}
+                              hasSelection={selectedPost !== null}
+                              activeTags={activeTags} // ADD THIS
+                            />
+                          </motion.div>
+                        )
+                      })
+                  ) : (
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ 
-                        duration: 0.4, 
-                        ease: "easeInOut",
-                        opacity: { duration: 0.3 }
-                      }}
-                      style={{ overflow: 'hidden' }}
+                      key="no-posts"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                     >
-                      <div style={{ marginTop: '10px' }}>
-                        {/* Large display of selected image */}
-                        {(() => {
-                          const allImages = getAllImages(selectedPost)
-                          const selectedImageData = allImages[selectedImageIndex]
-                          
-                          if (!selectedImageData) return null
-                          
-                          const imageUrl = urlForImage(selectedImageData.image)?.url()
-                          if (!imageUrl) return null
-                          
-                          return (
-                            <div className="image-container" style={{ marginBottom: '1rem' }}>
-                              <Image
-                                src={imageUrl}
-                                alt={selectedImageData.isMain ? selectedPost.title : `Gallery image`}
-                                width={0}
-                                height={0}
-                                sizes="100vw"
-                                style={{
-                                  width: '100%',  
-                                  height: 'auto',
-                                  maxHeight: '800px',
-                                  objectFit: 'contain'
-                                }}
-                              />
-                            </div>
-                          )
-                        })()}
-
-                        {/* Thumbnail grid */}
-                        <div className="card__gallery--thumbs">
-                          {getAllImages(selectedPost).map((imageData, i) => {
-                            const imageUrl = urlForImage(imageData.image)?.url()
-                            if (!imageUrl) return null
-                            
-                            const isCurrentlySelected = i === selectedImageIndex
-                            
-                            return (
-                              <div
-                                key={i}
-                                onClick={() => setSelectedImageIndex(i)}
-                                style={{
-                                  cursor: 'pointer',
-                                  transition: 'box-shadow 0.2s',
-                                  boxShadow: isCurrentlySelected ? '0 4px 8px rgba(0, 0, 0, 0.3)' : 'none'
-                                }}
-                              >
-                                <Image
-                                  src={imageUrl}
-                                  alt={imageData.isMain ? selectedPost.title : `Thumbnail ${i}`}
-                                  width={100}
-                                  height={100}
-                                  quality={50}
-                                  style={{ 
-                                    width: '100%', 
-                                    height: '100%', 
-                                    objectFit: 'cover',
-                                    aspectRatio: '1/1'
-                                  }}
-                                />
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
+                      No posts match the selected tags.
                     </motion.div>
-                  </AnimatePresence>
+                  )}
                 </div>
-              </motion.section>
+            </div>
+
+          </div>
+        </div>
+        {!isMobile && isDrawerOpen && (
+          <AnimatePresence>
+            {selectedPost && (
+              <div className='pr-4 pt-4'>
+                <PostDetail 
+                  post={selectedPost}
+                  selectedImageIndex={selectedImageIndex}
+                  onImageSelect={setSelectedImageIndex}
+                  allImages={getAllImages(selectedPost)}
+                  onClose={closeDrawer}
+                />
+              </div>
             )}
           </AnimatePresence>
-        </div>
+        )}
+         {!isDrawerOpen && (
+          <div className='mr-6 flex flex-col items-end'>
+            <FilterTags 
+              allTags={allTags}
+              activeTags={activeTags}
+              onToggleTag={toggleTag}
+            />
+          </div>
+        )}   
+
+        {isMobile && (
+          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} onClose={closeDrawer}>
+            <DrawerContent className="max-h-[96vh]">
+              <div className="mx-auto w-full max-w-4xl">
+                <div className="overflow-y-auto px-4 pb-4" style={{ maxHeight: 'calc(96vh - 140px)' }}>
+                  {selectedPost && (
+                    <PostDetail 
+                      post={selectedPost}
+                      selectedImageIndex={selectedImageIndex}
+                      onImageSelect={setSelectedImageIndex}
+                      allImages={getAllImages(selectedPost)}
+                      onClose={closeDrawer}
+                    />
+                  )}
+                </div>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
       </div>
     </Container>
   )

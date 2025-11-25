@@ -1,6 +1,7 @@
 import '~/styles/global.css'
 import '~/styles/container.css'
 import '~/styles/card.css'
+import '~/styles/post-detail.css'
 
 import type { AppProps } from 'next/app'
 import { lazy } from 'react'
