@@ -57,7 +57,6 @@ export default function IndexPage({
   const [hoveredPostId, setHoveredPostId] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(false)
 
-  // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 750)
@@ -76,7 +75,6 @@ export default function IndexPage({
       setActiveTags(tagsFromUrl)
     }
 
-    // Handle selected post from URL
     const postId = router.query.post
     if (typeof postId === 'string') {
       const post = posts.find((p) => p._id === postId)
@@ -118,9 +116,8 @@ export default function IndexPage({
   }
 
   const allTags = Array.from(new Set(posts.flatMap((p) => p.tags || [])))
-
+  
   const selectPost = (post: Post) => {
-    // Toggle: if clicking on already selected post, deselect it
     if (selectedPost && selectedPost._id === post._id) {
       closeDrawer()
       return
@@ -170,7 +167,6 @@ export default function IndexPage({
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .reverse()
 
-  // Create combined array of all images (mainImage + gallery)
   const getAllImages = (post: Post) => {
     const images = []
     
@@ -189,101 +185,124 @@ export default function IndexPage({
     return images
   }
 
-  return (
-    <Container>
-      <div className="flex justify-center md:justify-between">
-        {/* Main content area */}
-        <div className={`grid transition-all duration-300 ${selectedPost && !isMobile ? '' : ''}`}>
-          <div className="header__container">
-            <div className="header">
-                <div className="posts__container w-full md:w-auto">
-                  {sortedPosts.length ? (
-                    sortedPosts
-                      .slice()
-                      .reverse()
-                      .map((post) => {
-                        const isSelected = selectedPost && selectedPost._id === post._id
-                        const isHovered = hoveredPostId === post._id
-                        const hasSelection = selectedPost !== null
-                        const hasHover = hoveredPostId !== null
-                        
-                        let opacity = 1
-                        if (hasSelection) {
-                          // If this card is selected, full opacity
-                          // If another card is selected, low opacity
-                          // If hovering over this card (even when another is selected), show it
-                          if (isSelected) {
-                            opacity = 1
-                          } else if (isHovered) {
-                            opacity = 0.7 // Show on hover even when something else is selected
-                          } else {
-                            opacity = 0.5
-                          }
-                        } else if (hasHover && !isMobile) {
-                          opacity = isHovered ? 1 : 0.5
-                        }
-                        return (
-                          <motion.div
-                            key={post._id}
-                            
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: opacity, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            onClick={() => selectPost(post)}
-                            onMouseEnter={() => !isMobile && setHoveredPostId(post._id)}
-                            onMouseLeave={() => !isMobile && setHoveredPostId(null)}
-                            style={{ cursor: 'pointer', width:  ''}}
-                          >
-                            <Card 
-                              post={post} 
-                              onClick={() => selectPost(post)}
-                              isSelected={isSelected}
-                              hasSelection={selectedPost !== null}
-                              activeTags={activeTags} // ADD THIS
-                            />
-                          </motion.div>
-                        )
-                      })
-                  ) : (
-                    <motion.div
-                      key="no-posts"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      No posts match the selected tags.
-                    </motion.div>
-                  )}
-                </div>
-            </div>
+  const hasSelection = selectedPost !== null && !isMobile
 
-          </div>
-        </div>
-        {!isMobile && isDrawerOpen && (
-          <AnimatePresence>
-            {selectedPost && (
-              <div className='pr-4 pt-4'>
-                <PostDetail 
-                  post={selectedPost}
-                  selectedImageIndex={selectedImageIndex}
-                  onImageSelect={setSelectedImageIndex}
-                  allImages={getAllImages(selectedPost)}
-                  onClose={closeDrawer}
-                />
-              </div>
-            )}
-          </AnimatePresence>
-        )}
-         {!isDrawerOpen && (
-          <div className='mr-6 flex flex-col items-end'>
-            <FilterTags 
+  return (
+    <div className="h-screen overflow-hidden">
+      <div className="flex h-full">
+        {/* Left panel - cards list */}
+        <div  
+          className={`
+            transition-all duration-300 h-full flex flex-col
+            ${hasSelection ? 'w-64 flex-shrink-0' : 'w-full'}
+          `}
+        > 
+          {/* Filter tags header - fixed */}
+          <div className={`
+            px-4 md:px-6 lg:px-8 pt-4 pb-4 flex-shrink-0 
+            ${hasSelection ? '' : 'max-w-7xl md:mx-auto w-full'}
+          `}>
+            <FilterTags
               allTags={allTags}
               activeTags={activeTags}
               onToggleTag={toggleTag}
+              collapsed={hasSelection}
             />
           </div>
-        )}   
 
+          {/* Scrollable cards area */}
+          <div 
+            className="flex-1 overflow-y-auto scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            <div className={`
+                pb-4
+              ${hasSelection ? 'pl-4' : ' md:px-6 lg:px-8 max-w-7xl md:mx-auto'}
+            `}>
+              <div 
+                className={`
+                  grid gap-4 w-full transition-all duration-300
+                  ${hasSelection 
+                    ? 'grid-cols-1 p0-2' 
+                    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5'
+                  }
+                `}
+              >
+                {sortedPosts.length ? (
+                  sortedPosts
+                    .slice()
+                    .reverse()
+                    .map((post) => {
+                      const isSelected = selectedPost && selectedPost._id === post._id
+                      const isHovered = hoveredPostId === post._id
+                      const hasHover = hoveredPostId !== null
+                      
+                      let opacity = 1
+                      return (
+                        <motion.div
+                          key={post._id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: opacity, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          onClick={() => selectPost(post)}
+                          onMouseEnter={() => !isMobile && setHoveredPostId(post._id)}
+                          onMouseLeave={() => !isMobile && setHoveredPostId(null)}
+                          style={{ cursor: 'pointer' }}
+                          className='break-inside-avoid'
+                        >
+                          <Card 
+                            post={post} 
+                            onClick={() => selectPost(post)}
+                            isSelected={isSelected}
+                            hasSelection={hasSelection}
+                            activeTags={activeTags}
+                          />
+                        </motion.div>
+                      )
+                    })
+                ) : (
+                  <motion.div
+                    key="no-posts"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    No posts match the selected tags.
+                  </motion.div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right panel - post detail */}
+        {!isMobile && isDrawerOpen && selectedPost && (
+          <motion.div 
+            className="flex-1 h-full overflow-y-auto scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+          >
+            <div className="p-4">
+              <PostDetail 
+                post={selectedPost}
+                selectedImageIndex={selectedImageIndex}
+                onImageSelect={setSelectedImageIndex}
+                allImages={getAllImages(selectedPost)}
+                onClose={closeDrawer}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Mobile drawer */}
         {isMobile && (
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} onClose={closeDrawer}>
             <DrawerContent className="max-h-[96vh]">
@@ -304,6 +323,6 @@ export default function IndexPage({
           </Drawer>
         )}
       </div>
-    </Container>
+    </div>
   )
 }

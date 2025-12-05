@@ -27,12 +27,14 @@ export default defineType({
     }),
     defineField({
       name: 'tags',
-      type: 'array',
       title: 'Tags',
-      of: [{ type: 'string' }],
-      options: {
-        layout: 'tags', // This gives a "tag input" UI
-      },
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{ type: 'tag' }],
+        },
+      ],
     }),
     defineField({
       name: 'date',

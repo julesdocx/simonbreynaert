@@ -1,121 +1,104 @@
+// ~/components/PostDetail.tsx
 import Image from 'next/image'
+import { X } from 'lucide-react'
+import { PortableText } from '@portabletext/react'
 import { urlForImage } from '~/lib/sanity.image'
 import type { Post } from '~/lib/sanity.queries'
-import { PortableText } from '@portabletext/react'
-import { Button } from '~/components/ui/button'
-import { X } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 
 interface PostDetailProps {
   post: Post
   selectedImageIndex: number
   onImageSelect: (index: number) => void
-  allImages: Array<{ image: any; isMain: boolean }>
-  onClose?: () => void // NEW prop
+  allImages: { image: any; isMain: boolean }[]
+  onClose: () => void
 }
 
-export default function PostDetail({ 
-  post, 
-  selectedImageIndex, 
-  onImageSelect, 
+export default function PostDetail({
+  post,
   allImages,
-  onClose
+  onClose,
 }: PostDetailProps) {
-  const selectedImageData = allImages[selectedImageIndex]
-
   return (
-    
-    <div className="post-detail md:grid gap-6">
-      {/* Left Column - Content */}
-      <div className="space-y-4">
-            <Button 
-                size="sm"
-                aria-label="Cancel"
-                variant='secondary'
-                onClick={onClose}
-                >
-                <X/>
-            </Button>
-        <div>
-          <h3 className="text-2xl font-bold mb-2">{post.title}</h3>
-          <h2 className="mb-2 font-normal">{post.subtitle}</h2>
-          {post.date && (
-            <p className="text-sm text-muted-foreground">
-              {new Date(post.date).getFullYear()}
-            </p>
+    <div className="flex flex-col gap-4">
+      {/* Header - two columns */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Left column - title, tags */}
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-xl font-bold">{post.title}</h1>
+              {post.subtitle && (
+                <p className="text-sm text-muted-foreground">{post.subtitle}</p>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-muted rounded-full transition-colors sm:hidden"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="rounded-full text-xs">
+                {new Date(post.date).getFullYear()}
+              </Badge>
+              {post.tags.map((tag) => (
+                <Badge key={tag} variant="outline" className="rounded-full text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           )}
         </div>
-        
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag, i) => (
-              <Badge key={i} variant='outline' className='rounded-full '>{tag}</Badge>
-            ))}
-          </div>
-        )}
 
-        {post.body && (
-          <div className="prose prose-sm">
-              <PortableText value={post.body}/>
+        {/* Right column - body text */}
+        <div className="flex flex-col gap-3">
+          <div className="hidden sm:flex justify-end">
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-muted rounded-full transition-colors"
+            >
+              <X size={18} />
+            </button>
           </div>
-        )}
+          
+          {post.body && (
+            <div className="prose prose-sm max-w-none">
+              <PortableText value={post.body} />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Right Column - Images */}
-      <div className="space-y-4">
-        {/* Large selected image */}
-        {selectedImageData && (() => {
-          const imageUrl = urlForImage(selectedImageData.image)?.url()
-          if (!imageUrl) return null
-          
-          return (
-            <div className="mb-4">
-              <Image
-                src={imageUrl}
-                alt={selectedImageData.isMain ? post.title : `Gallery image`}
-                width={0}
-                height={0}
-                sizes="100vw"
-                className="w-full h-auto max-h-[900px] object-contain "
-                style={{
-                  width: '100%',  
-                  height: 'auto',
-                }}
-              />
-            </div>
-          )
-        })()}
-
-        {/* Thumbnail grid */}
-        <div className="grid grid-cols-7 gap-2">
-          {allImages.map((imageData, i) => {
-            const imageUrl = urlForImage(imageData.image)?.url()
+      {/* Image grid - masonry */}
+      {allImages.length > 0 && (
+        <div className="columns-1 sm:columns-2 gap-2">
+          {allImages.map((item, index) => {
+            const imageUrl = urlForImage(item.image)?.url()
             if (!imageUrl) return null
-            
-            const isCurrentlySelected = i === selectedImageIndex
-            
+
             return (
-              <button
-                key={i}
-                onClick={() => onImageSelect(i)}
-                className={`relative aspect-square overflow-hidden transition-all ${
-                  isCurrentlySelected 
-                    ? 'ring-2 ring-primary ring-offset-2' 
-                    : 'opacity-70 hover:opacity-100'
-                }`}
+              <div
+                key={index}
+                className="mb-2 break-inside-avoid"
               >
                 <Image
                   src={imageUrl}
-                  alt={imageData.isMain ? post.title : `Thumbnail ${i}`}
-                  fill
-                  sizes="(max-width: 768px) 25vw, 100px"
-                  className="object-cover"
+                  alt={`${post.title} - image ${index + 1}`}
+                  width={800}
+                  height={600}
+                  className="w-full h-auto rounded-md"
+                  style={{ display: 'block' }}
                 />
-              </button>
+              </div>
             )
           })}
         </div>
-      </div>
+      )}
     </div>
   )
 }

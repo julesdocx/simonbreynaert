@@ -1,8 +1,6 @@
 .card {
     cursor: pointer;
     user-select: none;
-    grid-template-columns: 120px 1fr;
-    padding: 6px;
 }
 
 .card__gallery--thumbs {
@@ -18,7 +16,7 @@
 }
 
 .card__header {
-    margin-left: 8px;
+
 }
 
 .card__image {

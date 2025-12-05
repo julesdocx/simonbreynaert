@@ -7,12 +7,11 @@ body {
     font-family: Helvetica, Arial, sans-serif;
 }
 h2 {
-    font-weight: 600;
+    font-weight: 400;
 }
 
 h3 {
-    font-size: 14px;
-    margin: 4px 0px;
+
 }
 
 .tags_container {
@@ -29,6 +28,7 @@ h3 {
     margin-top: 10px;
     gap: 8px;
     justify-content: space-between;
+    margin: auto;
 }
 
 #mainDiv {
@@ -83,14 +83,6 @@ h3 {
 
 .header__body-content p {
     margin: 0px 0px 8px 0px;
-}
-
-.header__container {
-    margin: auto;
-    max-width: 600px;
-    /* grid-template-columns: var(--header-width, 33.333%) auto; */
-    margin: 0px 12px;
-    transition: grid-template-columns 0.4s ease;
 }
 
 header {

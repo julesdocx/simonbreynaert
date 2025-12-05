@@ -1,4 +1,6 @@
 import Image from 'next/image'
+import { useState } from 'react'
+import { ArrowUpRight } from 'lucide-react'
 import { urlForImage } from '~/lib/sanity.image'
 import type { Post } from '~/lib/sanity.queries'
 import { Badge } from '~/components/ui/badge'
@@ -8,62 +10,84 @@ export default function Card({
   onClick,
   isSelected = false,
   hasSelection = false,
-  activeTags = [], // NEW prop
+  activeTags = [],
 }: { 
   post: Post
   onClick?: () => void
   isSelected?: boolean
   hasSelection?: boolean
-  activeTags?: string[] // NEW prop
+  activeTags?: string[]
 }) {
   const imageUrl = post.mainImage ? urlForImage(post.mainImage)?.url() : null
+  const [isHovered, setIsHovered] = useState(false)
 
+  const allTags = [
+    { label: new Date(post.date).getFullYear().toString(), isYear: true },  ...  post.tags.map(tag => ({ label: tag, isYear: false }))
+  ]
+  console.log(allTags);
   return (
-    <div className="card md:grid flex flex-col" onClick={onClick}>
-      {imageUrl && (
-        <div className="card__image">
-          <Image
-            src={imageUrl}
-            alt={post.title}
-            width={150}
-            height={150}
-            quality={50}
-            style={{ 
-              width: '100%', 
-              height: 'auto', 
-              objectFit: 'cover',
-              display: 'block'
-            }}
-          />
-        </div>
-      )}
-      
-      {/* Only show header when NO post is selected */}
+    <div 
+      className={`card flex flex-col break-column ${hasSelection? 'drop-shadow-sm px-4 py-3 mr-1' : ''}  rounded-sm`}
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+               
       {!hasSelection && (
-        <div className='card__header'>
-          <h2>{post.title}</h2>
-          <p className='text-sm text-neutral-400'>{post.subtitle}</p>
-          {post.tags && post.tags.length > 0 && (
-            <div className="flex w-full flex-wrap gap-2 card__badges">
-              <Badge className='rounded-full font-normal' variant='outline'>
-                {new Date(post.date).getFullYear()}
-              </Badge>
-              {post.tags.map((tag) => {
-                const isActiveTag = activeTags.includes(tag)
-                return (
-                  <Badge 
-                    key={tag}
-                    className={`rounded-full font-normal ${isActiveTag ? 'bg-green-500 text-white' : ''}`}
-                    variant={isActiveTag ? 'default' : 'outline'}
-                  >
-                    {tag}
-                  </Badge>
-                )
-              })}
+        <div>
+          {imageUrl && (
+            <div className="card__image relative overflow-hidden rounded-sm">
+              <Image
+                src={imageUrl}
+                alt={post.title}
+                width={150}
+                height={150}
+                quality={50}
+                style={{ 
+                  width: '100%', 
+                  height: 'auto', 
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
+              />
             </div>
           )}
         </div>
       )}
+      <div className='pt-2 mb-2'>
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h2>{post.title}</h2>
+            <p className='text-sm text-neutral-500'>{post.subtitle}</p>
+          </div>
+          <ArrowUpRight 
+            size={18} 
+            className={`
+              flex-shrink-0 
+              transition-transform duration-200
+              ${isHovered ? 'rotate-45' : 'rotate-0'}
+              ${isSelected ? 'rotate-45' : 'rotate-0'}
+            `}
+          />
+        </div>
+        {!hasSelection && (
+          <div>
+            {allTags && allTags.length > 0 && (
+              <div className='mt-2 flex flex-wrap gap-1 font-300'>
+                {allTags.map(({ label, isYear },index) => (
+                  <Badge 
+                    key={index} 
+                    variant="outline"
+                    className="text-xs rounded-full relative"
+                  >
+                    {label  || 'Untagged'}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

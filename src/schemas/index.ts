@@ -2,9 +2,10 @@ import { SchemaTypeDefinition } from 'sanity'
 
 import blockContent from './blockContent'
 import post from './post'
+import tags from './tags'
 
-export const schemaTypes = [post, blockContent]
+export const schemaTypes = [tags, post, blockContent]
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [post, blockContent],
+  types: [tags, post, blockContent],
 }
  
