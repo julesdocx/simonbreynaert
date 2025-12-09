@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import Image from 'next/image'
 
 import Card from '~/components/Card'
+import Header from '~/components/Header'
 import FilterTags from '~/components/FilterTags'
 import PostDetail from '~/components/PostDetail'
 import Container from '~/components/Container'
@@ -199,35 +200,37 @@ export default function IndexPage({
         > 
           {/* Filter tags header - fixed */}
           <div className={`
-            px-4 md:px-6 lg:px-8 pt-4 pb-4 flex-shrink-0 
+            px-2 md:px-6 lg:px-8 pt-3 flex-shrink-0 
             ${hasSelection ? '' : 'max-w-7xl md:mx-auto w-full'}
+            
           `}>
-            <FilterTags
-              allTags={allTags}
-              activeTags={activeTags}
-              onToggleTag={toggleTag}
-              collapsed={hasSelection}
-            />
+            <Header 
+                collapsed={hasSelection}
+                allTags={allTags}
+                activeTags={activeTags}
+                onToggleTag={toggleTag}
+              />
           </div>
 
           {/* Scrollable cards area */}
           <div 
-            className="flex-1 overflow-y-auto scrollbar-hide"
+            className="flex-1 overflow-y-auto scrollbar-hide px-2 md:px-0"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
             }}
           >
+            
             <div className={`
                 pb-4
               ${hasSelection ? 'pl-4' : ' md:px-6 lg:px-8 max-w-7xl md:mx-auto'}
             `}>
               <div 
                 className={`
-                  grid gap-4 w-full transition-all duration-300
+                  grid  w-full transition-all duration-300 mt-4
                   ${hasSelection 
-                    ? 'grid-cols-1 p0-2' 
-                    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5'
+                    ? 'grid-cols-1 p0-2 gap-2' 
+                    : 'grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5'
                   }
                 `}
               >
