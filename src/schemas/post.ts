@@ -68,6 +68,12 @@ export default defineType({
       title: 'Body',
       type: 'blockContent',
     }),
+    defineField({
+      name: 'videoLoop',
+      title: 'Video Loop (for homepage)',
+      type: 'string',
+      description: 'Filename of the video in /public/videos/ (e.g., "project-1.mp4")',
+    }),
   ],
   preview: {
     select: {
