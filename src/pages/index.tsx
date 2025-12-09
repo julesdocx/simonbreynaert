@@ -205,11 +205,12 @@ export default function IndexPage({
             
           `}>
             <Header 
-                collapsed={hasSelection}
-                allTags={allTags}
-                activeTags={activeTags}
-                onToggleTag={toggleTag}
-              />
+              collapsed={hasSelection}
+              allTags={allTags}
+              activeTags={activeTags}
+              onToggleTag={toggleTag}
+              onBack={closeDrawer}
+            />
           </div>
 
           {/* Scrollable cards area */}

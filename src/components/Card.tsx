@@ -60,7 +60,7 @@ export default function Card({
             <p className='text-sm text-neutral-500'>{post.subtitle}</p>
           </div>
           <ArrowUpRight 
-            size={18} 
+            size={16} 
             className={`
               flex-shrink-0 
               transition-transform duration-200

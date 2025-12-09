@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Mail, Instagram, Phone, ListFilter } from 'lucide-react'
+import { ChevronDown, Mail, Instagram, Phone, ListFilter, ArrowLeft } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 interface HeaderProps {
@@ -9,34 +10,39 @@ interface HeaderProps {
   allTags?: string[]
   activeTags?: string[]
   onToggleTag?: (tag: string) => void
+  onBack?: () => void
 }
 
 export default function Header({ 
   collapsed = false,
   allTags = [],
   activeTags = [],
-  onToggleTag
+  onToggleTag,
+  onBack
 }: HeaderProps) {
   const [bioOpen, setBioOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   if (collapsed) {
     return (
-      <header className="flex flex-col gap-2">
-        <h2 className="font-bold text-sm">Simon Breynaert</h2>
-        {activeTags.length > 0 && (
-          <span className="text-xs text-muted-foreground">
-            {activeTags.length} filter{activeTags.length > 1 ? 's' : ''} active
-          </span>
-        )}
+      <header className="py-2">
+        <Button 
+          variant="outline" 
+          onClick={onBack}
+          className="rounded-full"
+        >
+          <ArrowLeft size={18} className="-rotate-135" />
+          Back
+        </Button>
       </header>
     )
   }
 
+
   return (
-    <header className="flex flex-col gap-3 pb-2">
+    <header className="flex flex-col gap-3">
       {/* Top row - name and buttons */}
-      <div className="flex items-center justify-between gap-3 ">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="font-bold">Simon Breynaert</h2>
         
         <div className="flex items-center gap-2">
@@ -54,14 +60,14 @@ export default function Header({
           </Button>
 
           <Button
+            variant={filtersOpen || activeTags.length > 0 ? 'outline' : 'ghost'}
             size="sm"
-            variant='ghost'
             onClick={() => setFiltersOpen(!filtersOpen)}
             className="rounded-full relative"
             aria-label="Toggle filters"
           >
             <ListFilter size={16} />
-            Filters
+            Filter
             {activeTags.length > 0 && !filtersOpen && (
               <span className="absolute -top-1 -right-1 w-4 h-4 text-xs bg-black text-white rounded-full flex items-center justify-center">
                 {activeTags.length}
@@ -92,7 +98,7 @@ export default function Header({
                   onToggleTag(toggledTag)
                 }
               }}
-              className="flex flex-wrap gap-1 justify-start"
+              className="flex flex-wrap gap-1 justify-start pb-2"
             >
               {allTags.map((tag, index) => (
                 <motion.div

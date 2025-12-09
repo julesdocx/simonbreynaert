@@ -1,7 +1,6 @@
 // ~/components/PostDetail.tsx
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { X } from 'lucide-react'
 import { PortableText } from '@portabletext/react'
 import {
   Carousel,
@@ -65,12 +64,6 @@ export default function PostDetail({
               <p className="text-sm text-muted-foreground">{post.subtitle}</p>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 hover:bg-muted rounded-full transition-colors"
-          >
-            <X size={18} />
-          </button>
         </div>
 
         {/* Tags */}
