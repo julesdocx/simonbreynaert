@@ -24,7 +24,6 @@ export default function Card({
   const allTags = [
     { label: new Date(post.date).getFullYear().toString(), isYear: true },  ...  post.tags.map(tag => ({ label: tag, isYear: false }))
   ]
-  console.log(allTags);
   return (
     <div 
       className={`card flex flex-col break-column ${hasSelection? 'drop-shadow-sm px-4 py-3 mr-1' : ''}  rounded-sm`}
@@ -54,7 +53,7 @@ export default function Card({
           )}
         </div>
       )}
-      <div className='pt-2 mb-2'>
+      <div className='pt-2 mb-1 pb-4 flex flex-col gap-2'>
         <div className="flex items-start justify-between gap-2">
           <div>
             <h2>{post.title}</h2>
@@ -73,12 +72,12 @@ export default function Card({
         {!hasSelection && (
           <div>
             {allTags && allTags.length > 0 && (
-              <div className='mt-2 flex flex-wrap gap-1 font-300'>
+              <div className='mt-2 flex flex-wrap gap-1 '>
                 {allTags.map(({ label, isYear },index) => (
                   <Badge 
                     key={index} 
                     variant="outline"
-                    className="text-xs rounded-full relative"
+                    className="text-xs font-normal rounded-full relative"
                   >
                     {label  || 'Untagged'}
                   </Badge>
