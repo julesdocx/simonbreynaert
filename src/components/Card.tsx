@@ -87,7 +87,7 @@ export default function Card({
                   <Badge 
                     key={label} 
                     variant={isYear ? 'secondary' : (activeTags.includes(label) ? 'default' : 'default')}
-                    className="text-xs rounded-full relative"
+                    className="text-xs rounded-full font-normal relative"
                   >
                     {label}
                   </Badge>
