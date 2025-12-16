@@ -50,6 +50,7 @@ export const postSlugsQuery = groq`
   *[_type == "post" && defined(slug.current)][].slug.current
 `
 
+
 export interface Post {
   _type: 'post'
   _id: string
@@ -72,4 +73,33 @@ export interface Post {
     _type: 'image'
     alt?: string
   }[]
+}
+
+export const bioQuery = groq`*[_type == "bio"][0] {
+  bioText,
+  profilePhoto,
+  email,
+  phone,
+  socials,
+  selectedClients
+}`
+
+export interface Bio {
+  bioText: string
+  profilePhoto?: ImageAsset
+  email: string
+  phone?: string
+  socials?: {
+    platform: 'instagram' | 'linkedin' | 'twitter' | 'vimeo' | 'behance' | 'website'
+    url: string
+    handle?: string
+  }[]
+  selectedClients?: {
+    name: string
+    url?: string
+  }[]
+}
+
+export async function getBio(client: SanityClient): Promise<Bio | null> {
+  return await client.fetch(bioQuery)
 }

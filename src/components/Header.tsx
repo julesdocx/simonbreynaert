@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { useRouter } from 'next/router'
 import { motion, AnimatePresence } from 'motion/react'
+import Image from 'next/image'
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Mail, Instagram, Phone, ListFilter, ArrowLeft } from 'lucide-react'
+import { ChevronDown, Mail, Instagram, Phone, ListFilter, ArrowLeft, Linkedin, Globe, Video } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { urlForImage } from '~/lib/sanity.image'
+import type { Bio } from '~/lib/sanity.queries'
 
 interface HeaderProps {
   collapsed?: boolean
@@ -11,6 +13,16 @@ interface HeaderProps {
   activeTags?: string[]
   onToggleTag?: (tag: string) => void
   onBack?: () => void
+  bio?: Bio | null
+}
+
+const platformIcons: Record<string, React.ReactNode> = {
+  instagram: <Instagram size={14} />,
+  linkedin: <Linkedin size={14} />,
+  twitter: <Globe size={14} />,
+  vimeo: <Video size={14} />,
+  behance: <Globe size={14} />,
+  website: <Globe size={14} />,
 }
 
 export default function Header({ 
@@ -18,7 +30,8 @@ export default function Header({
   allTags = [],
   activeTags = [],
   onToggleTag,
-  onBack
+  onBack,
+  bio
 }: HeaderProps) {
   const [bioOpen, setBioOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -31,17 +44,15 @@ export default function Header({
           onClick={onBack}
           className="rounded-full"
         >
-          <ArrowLeft size={18} className="-rotate-135" />
+          <ArrowLeft size={18} />
           Back
         </Button>
       </header>
     )
   }
 
-
   return (
     <header className="flex flex-col gap-3">
-      {/* Top row - name and buttons */}
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-bold">Simon Breynaert</h2>
         
@@ -77,7 +88,6 @@ export default function Header({
         </div>
       </div>
 
-      {/* Filter tags row */}
       <AnimatePresence>
         {filtersOpen && allTags.length > 0 && (
           <motion.div
@@ -127,9 +137,8 @@ export default function Header({
         )}
       </AnimatePresence>
 
-      {/* Bio section */}
       <AnimatePresence>
-        {bioOpen && (
+        {bioOpen && bio && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -137,41 +146,93 @@ export default function Header({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-4 max-w-3xl">
-              <div className="flex flex-col gap-4">
-                <p className="text-sm text-muted-foreground">
-                  Simon Breynaert is a Belgian visual artist and spatial designer working across photography, video, scenography and digital research. His practice explores how spaces are perceived, read and activated, using movement, observation and image-making as tools to translate architecture into atmospheric visual narratives.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Moving between autonomous work and commissioned projects, Simon creates visual identities, documents installations and performances, and develops spatial experiments that connect image, context and experience. Based in Brussels, he collaborates with designers, architects, cultural institutions and creative studios while pursuing an ongoing artistic research into perception, space and storytelling.
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-4">
+              {/* Column 1: Bio text */}
+              <div>
+                <p className="text-sm text-muted-foreground whitespace-pre-line text-black">
+                  {bio.bioText}
                 </p>
               </div>
-              
+
+              {/* Column 2: Contact */}
               <div className="flex flex-col gap-2">
                 <h3 className="font-semibold text-sm">Contact</h3>
-                <a 
-                  href="mailto:simonbreynaert@gmail.com" 
-                  className="text-sm flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Mail size={14} />
-                  simonbreynaert@gmail.com
-                </a>
-                <a 
-                  href="https://instagram.com/smn_brynrt" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Instagram size={14} />
-                  @smn_brynrt
-                </a>
-                <a 
-                  href="tel:+32495252010" 
-                  className="text-sm flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Phone size={14} />
-                  +32 495 25 20 10
-                </a>
+                
+                {bio.email && (
+                  <a 
+                    href={`mailto:${bio.email}`}
+                    className="text-sm flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Mail size={14} />
+                    {bio.email}
+                  </a>
+                )}
+                
+                {bio.phone && (
+                  <a 
+                    href={`tel:${bio.phone.replace(/\s/g, '')}`}
+                    className="text-sm flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Phone size={14} />
+                    {bio.phone}
+                  </a>
+                )}
+                
+                {bio.socials?.map((social, index) => (
+                  <a 
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {platformIcons[social.platform] || <Globe size={14} />}
+                    {social.handle || social.platform}
+                  </a>
+                ))}
+              </div>
+
+              {/* Column 3: Selected Clients */}
+              <div className="flex flex-col gap-2">
+                <h3 className="font-semibold text-sm">Selected Clients</h3>
+                {bio.selectedClients && bio.selectedClients.length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    {bio.selectedClients.map((client, index) => (
+                      client.url ? (
+                        <a
+                          key={index}
+                          href={client.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {client.name}
+                        </a>
+                      ) : (
+                        <span 
+                          key={index}
+                          className="text-sm text-muted-foreground"
+                        >
+                          {client.name}
+                        </span>
+                      )
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Column 4: Profile Photo */}
+              <div className="flex flex-col gap-2">
+                {bio.profilePhoto && (
+                  <div className="relative w-32 h-32 rounded-md overflow-hidden">
+                    <Image
+                      src={urlForImage(bio.profilePhoto)?.url() || ''}
+                      alt="Simon Breynaert"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

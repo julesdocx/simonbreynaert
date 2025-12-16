@@ -12,7 +12,7 @@ import PostDetail from '~/components/PostDetail'
 import Container from '~/components/Container'
 import { readToken } from '~/lib/sanity.api'
 import { getClient } from '~/lib/sanity.client'
-import { getPosts, type Post, postsQuery } from '~/lib/sanity.queries'
+import { getPosts, getBio, type Post, type Bio, postsQuery } from '~/lib/sanity.queries'  // Add getBio and Bio
 import { urlForImage } from '~/lib/sanity.image'
 import type { SharedPageProps } from '~/pages/_app'
 import {
@@ -24,9 +24,10 @@ import {
   DrawerTitle,
 } from '~/components/ui/drawer'
 
-export const getStaticProps: GetStaticProps<SharedPageProps & { posts: Post[]; tags: string[] }> = async ({ draftMode = false }) => {
+export const getStaticProps: GetStaticProps<SharedPageProps & { posts: Post[]; tags: string[]; bio: Bio | null }> = async ({ draftMode = false }) => {
   const client = getClient(draftMode ? { token: readToken } : undefined)
   const posts = await getPosts(client)
+  const bio = await getBio(client)
 
   const tagSet = new Set<string>()
   posts.forEach((post) => {
@@ -40,14 +41,17 @@ export const getStaticProps: GetStaticProps<SharedPageProps & { posts: Post[]; t
       token: draftMode ? readToken : '',
       posts,
       tags,
+      bio,
     },
   }
 }
 
 export default function IndexPage({
   posts: initialPosts,
+  bio,  // Add bio here
 }: {
   posts: Post[]
+  bio: Bio | null  // Add type here
 }) {
   const router = useRouter()
   const [posts] = useLiveQuery<Post[]>(initialPosts, postsQuery)
@@ -210,6 +214,7 @@ export default function IndexPage({
               activeTags={activeTags}
               onToggleTag={toggleTag}
               onBack={closeDrawer}
+              bio={bio}
             />
           </div>
 
