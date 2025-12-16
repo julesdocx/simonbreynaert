@@ -156,7 +156,6 @@ export default function Header({
 
               {/* Column 2: Contact */}
               <div className="flex flex-col gap-2">
-                <h3 className="font-semibold text-sm">Contact</h3>
                 
                 {bio.email && (
                   <a 
@@ -194,7 +193,7 @@ export default function Header({
 
               {/* Column 3: Selected Clients */}
               <div className="flex flex-col gap-2">
-                <h3 className="font-semibold text-sm">Selected Clients</h3>
+                <h3 className="text-sm ">Selected Clients:</h3>
                 {bio.selectedClients && bio.selectedClients.length > 0 && (
                   <div className="flex flex-col gap-1">
                     {bio.selectedClients.map((client, index) => (
