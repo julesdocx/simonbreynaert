@@ -52,7 +52,7 @@ export default defineType({
         hotspot: true,
       },
     }),
-        defineField({
+    defineField({
       name: 'gallery',
       title: 'Gallery',
       type: 'array',
@@ -63,6 +63,74 @@ export default defineType({
         },
       ],
     }),
+defineField({
+  name: 'videos',
+  title: 'Videos',
+  type: 'array',
+  of: [
+    {
+      type: 'object',
+      name: 'vimeoVideo',
+      title: 'Vimeo Video',
+      fields: [
+        {
+          name: 'url',
+          title: 'Vimeo URL',
+          type: 'url',
+          validation: (Rule) => Rule.required(),
+        },
+        {
+          name: 'title',
+          title: 'Title (optional)',
+          type: 'string',
+        },
+      ],
+      preview: {
+        select: { title: 'title', url: 'url' },
+        prepare({ title, url }) {
+          return {
+            title: title || url,
+            subtitle: 'Vimeo Video',
+          }
+        },
+      },
+    },
+  ],
+}),
+defineField({
+  name: 'videos',
+  title: 'Videos',
+  type: 'array',
+  of: [
+    {
+      type: 'object',
+      name: 'vimeoVideo',
+      title: 'Vimeo Video',
+      fields: [
+        {
+          name: 'url',
+          title: 'Vimeo URL',
+          type: 'url',
+          validation: (Rule) => Rule.required(),
+        },
+        {
+          name: 'title',
+          title: 'Title (optional)',
+          type: 'string',
+        },
+      ],
+      preview: {
+        select: { title: 'title', url: 'url' },
+        prepare({ title, url }) {
+          return {
+            title: title || url,
+            subtitle: 'Vimeo Video',
+          }
+        },
+      },
+    },
+  ],
+}),
     defineField({
       name: 'body',
       title: 'Body',

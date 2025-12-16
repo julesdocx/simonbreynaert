@@ -14,7 +14,8 @@ export const postsQuery = groq`*[_type == "post" && defined(slug.current)] | ord
   gallery,
   body,
   "tags": tags[]->name,
-  videoLoop
+  videoLoop,
+  videos,
 }`
 
 export async function getPosts(client: SanityClient): Promise<Post[]> {
@@ -32,7 +33,8 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   gallery,
   body,
   "tags": tags[]->name,
-  videoLoop
+  videoLoop,
+  videos,
 }`
 
 export async function getPost(
@@ -60,6 +62,7 @@ export interface Post {
   body: PortableTextBlock[]
   tags?: string[]
   videoLoop?: string
+  videos?: { url: string; title?: string }[]
   gallery?: {
     asset: {
       _ref: string
