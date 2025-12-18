@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Card from '~/components/Card'
 import Header from '~/components/Header'
 import FilterTags from '~/components/FilterTags'
+import Footer from '~/components/Footer'
 import PostDetail from '~/components/PostDetail'
 import Container from '~/components/Container'
 import { readToken } from '~/lib/sanity.api'
@@ -284,6 +285,7 @@ export default function IndexPage({
                 )}
               </div>
             </div>
+              {!hasSelection && <Footer />}
           </div>
         </div>
 
