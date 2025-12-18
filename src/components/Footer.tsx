@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="py-6 px-4 text-center text-xs text-muted-foreground">
+    <footer className="py-6 text-xs text-muted-foreground border-t border-gray-200">
       <p>© Simon Breynaert, 2025.</p>
       <p>All rights reserved.</p>
       <p className="mt-2">

@@ -285,7 +285,9 @@ export default function IndexPage({
                 )}
               </div>
             </div>
+            <div className='mx-auto w-full max-w-7xl px-2 md:px-6 lg:px-8'>
               {!hasSelection && <Footer />}
+            </div>
           </div>
         </div>
 
