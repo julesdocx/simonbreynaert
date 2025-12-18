@@ -52,7 +52,7 @@ export default function Header({
   }
 
   return (
-    <header className="flex flex-col gap-3">
+    <header className="flex flex-col gap-3 border-b border-gray-200 pb-2">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-bold">Simon Breynaert</h2>
         
@@ -71,7 +71,7 @@ export default function Header({
           </Button>
 
           <Button
-            variant={filtersOpen || activeTags.length > 0 ? 'outline' : 'ghost'}
+            variant='ghost'
             size="sm"
             onClick={() => setFiltersOpen(!filtersOpen)}
             className="rounded-full relative"
@@ -154,7 +154,34 @@ export default function Header({
                 </p>
               </div>
 
-              {/* Column 2: Contact */}
+              <div className="flex flex-col gap-2">
+                <h3 className="text-sm ">Selected Clients:</h3>
+                {bio.selectedClients && bio.selectedClients.length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    {bio.selectedClients.map((client, index) => (
+                      client.url ? (
+                        <a
+                          key={index}
+                          href={client.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {client.name}
+                        </a>
+                      ) : (
+                        <span 
+                          key={index}
+                          className="text-sm text-muted-foreground"
+                        >
+                          {client.name}
+                        </span>
+                      )
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex flex-col gap-2">
                 
                 {bio.email && (
@@ -191,34 +218,7 @@ export default function Header({
                 ))}
               </div>
 
-              {/* Column 3: Selected Clients */}
-              <div className="flex flex-col gap-2">
-                <h3 className="text-sm ">Selected Clients:</h3>
-                {bio.selectedClients && bio.selectedClients.length > 0 && (
-                  <div className="flex flex-col gap-1">
-                    {bio.selectedClients.map((client, index) => (
-                      client.url ? (
-                        <a
-                          key={index}
-                          href={client.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {client.name}
-                        </a>
-                      ) : (
-                        <span 
-                          key={index}
-                          className="text-sm text-muted-foreground"
-                        >
-                          {client.name}
-                        </span>
-                      )
-                    ))}
-                  </div>
-                )}
-              </div>
+
 
               {/* Column 4: Profile Photo */}
               <div className="flex flex-col gap-2">
