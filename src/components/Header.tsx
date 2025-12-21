@@ -52,7 +52,7 @@ export default function Header({
   }
 
   return (
-    <header className="flex flex-col gap-3 border-b border-gray-200 pb-2">
+    <header className="flex flex-col gap-3 pb-2">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-bold">Simon Breynaert</h2>
         
