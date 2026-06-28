@@ -18,20 +18,20 @@ export default function Document() {
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Simon Breynaert" />
-        <meta property="og:title" content="Simon Breynaert | Visual Artist & Spatial Designer" />
+        <meta property="og:title" content="Simon Breynaert | Architectural Photographer & 3D Archivist" />
         <meta property="og:description" content="Belgian visual artist and spatial designer working across photography, video, scenography and digital research. Based in Brussels." />
         <meta property="og:image" content="https://simonbreynaert.com/og-image.jpg" />
         <meta property="og:url" content="https://simonbreynaert.com" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Simon Breynaert | Visual Artist & Spatial Designer" />
+        <meta name="twitter:title" content="Simon Breynaert | Architectural Photographer & 3D Archivist" />
         <meta name="twitter:description" content="Belgian visual artist and spatial designer working across photography, video, scenography and digital research. Based in Brussels." />
         <meta name="twitter:image" content="https://simonbreynaert.com/og-image.jpg" />
         
         {/* Theme color */}
         <meta name="theme-color" content="#ffffff" />
-        <title>Simon Breynaert | Visual Artist & Spatial Designer</title>
+        <title>Simon Breynaert | Architectural Photographer & 3D Archivist</title>
       </Head>
       <body>
         <Main />
